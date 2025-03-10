@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiffrement Hill</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container bg-light col-5 shadow border rounded-4  mt-5">
+        <div class="container mt-5">
+            <h1 class="text-center mb-4">Chiffrement Hill</h1>
+            <div class="form-group">
+                <label for="texte">Texte :</label>
+                <textarea id="texte" class="form-control" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="cle">Matrice de Clé (2x2) :</label>
+                <div class="row">
+                    <div class="col">
+                        <input type="number" id="a" class="form-control" placeholder="a">
+                    </div>
+                    <div class="col">
+                        <input type="number" id="c" class="form-control" placeholder="c">
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col">
+                        <input type="number" id="b" class="form-control" placeholder="b">
+                    </div>
+                    <div class="col">
+                        <input type="number" id="d" class="form-control" placeholder="d">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group text-center">
+                <button onclick="chiffrer()" class="btn btn-primary mx-2">Chiffrer</button>
+                <button onclick="dechiffrer()" class="btn btn-secondary mx-2">Déchiffrer</button>
+            </div>
+            <div class="form-group">
+                <label for="resultat">Résultat :</label>
+                <textarea id="resultat" class="form-control" rows="4" readonly></textarea>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function chiffrer() {
+            let texte = document.getElementById('texte').value.toUpperCase().replace(/[^A-Z]/g, '');
+            let a = parseInt(document.getElementById('a').value);
+            let b = parseInt(document.getElementById('b').value);
+            let c = parseInt(document.getElementById('c').value);
+            let d = parseInt(document.getElementById('d').value);
+            let cleMatrice = [[a, c], [b, d]];
+            
+            if (texte.length % 2 !== 0) {
+                texte += 'X';  
+            }
+        
+            let matriceTexte = creerMatriceTexte(texte);
+            let resultat = [];
+            for (let i = 0; i < matriceTexte.length; i++) {
+                let vecteur = matriceTexte[i];
+                let vecteurChiffre = multiplicationMatriceVecteur(cleMatrice, vecteur);
+                resultat.push(...vecteurChiffre);
+            }
+            
+            document.getElementById('resultat').value = resultat.map(num => String.fromCharCode(num + 65)).join('');
+        }
+        
+        function dechiffrer() {
+            let texte = document.getElementById('texte').value.toUpperCase().replace(/[^A-Z]/g, '');
+            let a = parseInt(document.getElementById('a').value);
+            let b = parseInt(document.getElementById('b').value);
+            let c = parseInt(document.getElementById('c').value);
+            let d = parseInt(document.getElementById('d').value);
+            let cleMatrice = [[a, c], [b, d]];
+            
+            // Calculer l'inverse de la matrice
+            let det = (cleMatrice[0][0] * cleMatrice[1][1] - cleMatrice[0][1] * cleMatrice[1][0]) % 26;
+            let detInv = modInverse(det, 26);
+            
+            if (detInv === null) {
+                alert("La matrice de clé n'est pas inversible modulo 26. Veuillez choisir une autre matrice.");
+                return;
+            }
+            
+            let cleMatriceInverse = inverseMatrice(cleMatrice, 26);
+            
+            if (texte.length % 2 !== 0) {
+                texte += 'X';  
+            }
+        
+            let matriceTexte = creerMatriceTexte(texte);
+            let resultat = [];
+            for (let i = 0; i < matriceTexte.length; i++) {
+                let vecteur = matriceTexte[i];
+                let vecteurDechiffre = multiplicationMatriceVecteur(cleMatriceInverse, vecteur);
+                resultat.push(...vecteurDechiffre);
+            }
+            
+            document.getElementById('resultat').value = resultat.map(num => String.fromCharCode(num + 65)).join('');
+        }
+        
+        function creerMatriceTexte(texte) {
+            let matriceTexte = [];
+            for (let i = 0; i < texte.length; i += 2) {
+                matriceTexte.push([
+                    texte.charCodeAt(i) - 65,
+                    texte.charCodeAt(i + 1) ? texte.charCodeAt(i + 1) - 65 : 0
+                ]);
+            }
+            return matriceTexte;
+        }
+        
+        function multiplicationMatriceVecteur(matrice, vecteur) {
+            let resultat = [];
+            for (let i = 0; i < matrice.length; i++) {
+                let somme = 0;
+                for (let j = 0; j < vecteur.length; j++) {
+                    somme += matrice[i][j] * vecteur[j];
+                }
+                resultat.push(somme % 26);
+            }
+            return resultat;
+        }
+        
+        function inverseMatrice(matrice, mod) {
+            let det = (matrice[0][0] * matrice[1][1] - matrice[0][1] * matrice[1][0]) % mod;
+            let detInv = modInverse(det, mod);
+            
+            return [
+                [(matrice[1][1] * detInv) % mod, (-matrice[0][1] * detInv) % mod],
+                [(-matrice[1][0] * detInv) % mod, (matrice[0][0] * detInv) % mod]
+            ].map(row => row.map(val => ((val % mod) + mod) % mod));
+        }
+        
+        function modInverse(a, mod) {
+            a = ((a % mod) + mod) % mod; // Assure que a est positif
+            for (let x = 1; x < mod; x++) {
+                if ((a * x) % mod === 1) {
+                    return x;
+                }
+            }
+            return null; // Retourne null si l'inverse n'existe pas
+        }
+    </script>
+</body>
+</html>
