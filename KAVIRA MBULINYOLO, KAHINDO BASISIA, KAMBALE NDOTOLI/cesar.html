@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithme de César</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container bg-light col-5 shadow border rounded-4  mt-5">
+        <div class="container mt-5">
+            <h1 class="text-center mb-4">Algorithme de chiffrement César</h1>
+            <div class="form-group">
+                <label for="texte">Texte :</label>
+                <textarea id="texte" class="form-control" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="cle">Clé :</label>
+                <input type="number" id="cle" class="form-control">
+            </div> <br>
+            <div class="form-group text-center">
+                <button onclick="chiffrer()" class="btn btn-primary mx-2">Chiffrer</button>
+                <button onclick="dechiffrer()" class="btn btn-secondary mx-2">Déchiffrer</button>
+            </div>
+            <div class="form-group">
+                <label for="resultat">Résultat :</label>
+                <textarea id="resultat" class="form-control" rows="4" readonly></textarea>
+            </div>
+        </div>
+
+    </div>
+    
+    
+    <script >
+        let texteChiffre = '';
+
+function chiffrer() {
+    let texte = document.getElementById('texte').value;
+    let cle = parseInt(document.getElementById('cle').value);
+    texteChiffre = cesar(texte, cle);
+    document.getElementById('resultat').value = texteChiffre;
+}
+
+function dechiffrer() {
+    let cle = parseInt(document.getElementById('cle').value);
+    let texteDechiffre = cesar(texteChiffre, -cle);
+    document.getElementById('texte').value = texteDechiffre;
+    document.getElementById('resultat').value = texteDechiffre;
+}
+
+function cesar(texte, decalage) {
+    let resultat = '';
+    for (let i = 0; i < texte.length; i++) {
+        let caractere = texte[i];
+        if (caractere.match(/[a-z]/i)) {
+            let code = texte.charCodeAt(i);
+            let decalagecode = (code >= 65 && code <= 90) ? 65 : 97;
+            caractere = String.fromCharCode(((code - decalagecode + decalage) % 26 + 26) % 26 + decalagecode);
+        }
+        resultat += caractere;
+    }
+    return resultat;
+}
+    </script>
+</body>
+</html>

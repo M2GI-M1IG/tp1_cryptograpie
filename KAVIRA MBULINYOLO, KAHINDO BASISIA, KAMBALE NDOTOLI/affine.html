@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiffrement Affine</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container bg-light col-5 shadow border rounded-4  mt-5">
+        <div class="container mt-5"> 
+        
+            <h1 class="text-center mb-4">Algorithme de chiffrement Affine</h1>
+            <div class="form-group">
+                <label for="texte">Texte :</label>
+                <textarea id="texte" class="form-control" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="a">Valeur de a :</label>
+                <input type="number" id="a" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="b">Valeur de b :</label>
+                <input type="number" id="b" class="form-control">
+            </div> <br> 
+            <div class="form-group text-center">
+                <button onclick="chiffrer()" class="btn btn-primary mx-2">Chiffrer</button>
+                <button onclick="dechiffrer()" class="btn btn-secondary mx-2">Déchiffrer</button>
+            </div>
+            <div class="form-group">
+                <label for="resultat">Résultat :</label>
+                <textarea id="resultat" class="form-control" rows="4" readonly></textarea>
+            </div>
+        </div>
+
+    </div>
+    
+    
+    <script >
+        function chiffrer() {
+            let texte = document.getElementById('texte').value;
+            let a = parseInt(document.getElementById('a').value);
+            let b = parseInt(document.getElementById('b').value);
+            let resultat = '';
+            for (let i = 0; i < texte.length; i++) {
+                let caractere = texte[i];
+                if (caractere.match(/[a-z]/i)) {
+                    let code = texte.charCodeAt(i);
+                    let decalage = (code >= 65 && code <= 90) ? 65 : 97; 
+                    let chiffré = ((a * (code - decalage) + b) % 26) + decalage;
+                    resultat += String.fromCharCode(chiffré);
+                } else {
+                    resultat += caractere;
+                }
+            }
+            document.getElementById('resultat').value = resultat;
+        }
+        
+        function dechiffrer() {
+            let texte = document.getElementById('texte').value;
+            let a = parseInt(document.getElementById('a').value);
+            let b = parseInt(document.getElementById('b').value);
+            let a_inv = modInverse(a, 26);
+            let resultat = '';
+            for (let i = 0; i < texte.length; i++) {
+                let caractere = texte[i];
+                if (caractere.match(/[a-z]/i)) {
+                    let code = texte.charCodeAt(i);
+                    let decalage = (code >= 65 && code <= 90) ? 65 : 97;
+                    let dechiffré = (a_inv * (code - decalage - b + 26) % 26) + decalage;
+                    resultat += String.fromCharCode(dechiffré);
+                } else {
+                    resultat += caractere;
+                }
+            }
+            document.getElementById('resultat').value = resultat;
+        }
+        
+        function modInverse(a, m) {
+            a = ((a % m) + m) % m;
+            for (let x = 1; x < m; x++) {
+                if ((a * x) % m === 1) {
+                    return x;
+                }
+            }
+            
+        }
+        
+
+    </script>
+</body>
+</html>

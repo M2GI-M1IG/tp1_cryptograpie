@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Déchiffrement César sans clé</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container bg-light col-5 shadow border rounded-4  mt-5">
+        <div class="container mt-5">
+            <h1 class="text-center mb-4">César sans clé  </h1>
+            <div class="form-group">
+                <label for="texte">Texte chiffré :</label>
+                <textarea id="texte" class="form-control" rows="4"></textarea>
+            </div><br>
+            <div class="form-group text-center">
+                <button onclick="bruteforce()" class="btn btn-primary mx-2">Déchiffrer</button>
+            </div>
+            <div class="form-group">
+                <label for="resultats">Résultats :</label>
+                <textarea id="resultats" class="form-control" rows="8" readonly></textarea>
+            </div>
+        </div>
+
+    </div>
+    
+    <script>
+        function bruteforce() {
+            let texte = document.getElementById('texte').value;
+            let resultats = [];
+        
+            for (let decalage = 0; decalage < 26; decalage++) {
+                let texteDechiffre = cesar(texte, -decalage);
+                resultats.push(`Clé ${decalage}: ${texteDechiffre}`);
+            }
+        
+            document.getElementById('resultats').value = resultats.join('\n');
+        }
+        
+        function cesar(texte, decalage) {
+            let resultat = '';
+            for (let i = 0; i < texte.length; i++) {
+                let caractere = texte[i];
+                if (caractere.match(/[a-z]/i)) {
+                    let code = texte.charCodeAt(i);
+                    let decalageUnicode = (code >= 65 && code <= 90) ? 65 : 97;
+                    caractere = String.fromCharCode(((code - decalageUnicode + decalage) % 26 + 26) % 26 + decalageUnicode);
+                }
+                resultat += caractere;
+            }
+            return resultat;
+        }
+        
+    </script>
+</body>
+</html>
