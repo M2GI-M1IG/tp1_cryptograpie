@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiffrement Hill</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container bg-light col-5 shadow border rounded-4  mt-5">
+        <div class="container mt-5">
+            <h1 class="text-center mb-4">Hill sans clé</h1>
+            <div class="form-group">
+                <label for="texte">Texte :</label>
+                <textarea id="texte" class="form-control" rows="4"></textarea>
+            </div><br>
+            <div class="form-group text-center">
+                <button onclick="bruteforce()" class="btn btn-primary mx-2">Déchiffrer</button>
+            </div>
+            <div class="form-group">
+                <label for="resultat">Résultats :</label>
+                <textarea id="resultat" class="form-control" rows="8" readonly></textarea>
+            </div>
+        </div>
+
+    </div>
+   
+    
+    <script >
+        function bruteforce() {
+            let texte = document.getElementById('texte').value.toUpperCase().replace(/[^A-Z]/g, '');
+            
+            if (texte.length % 2 !== 0) {
+                texte += 'X';  
+            }
+        
+            let matriceTexte = creerMatriceTexte(texte);
+            let resultat = [];
+            
+            for (let a = 0; a < 26; a++) {
+                for (let b = 0; b < 26; b++) {
+                    for (let c = 0; c < 26; c++) {
+                        for (let d = 0; d < 26; d++) {
+                            let cleMatrice = [[a, b], [c, d]];
+                            let det = (a * d - b * c) % 26;
+                            if (det !== 0 && gcd(det, 26) === 1) {
+                                let texteDechiffre = '';
+                                for (let i = 0; i < matriceTexte.length; i++) {
+                                    let vecteur = matriceTexte[i];
+                                    let vecteurDechiffre = multiplicationMatriceVecteur(inverseMatrice(cleMatrice, 26), vecteur);
+                                    texteDechiffre += vecteurDechiffre.map(num => String.fromCharCode(num + 65)).join('');
+                                }
+                                resultat.push(`Clé: [[${a}, ${b}], [${c}, ${d}]] - Texte: ${texteDechiffre}`);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            document.getElementById('resultat').value = resultat.join('\n');
+        }
+        
+        function creerMatriceTexte(texte) {
+            let matriceTexte = [];
+            for (let i = 0; i < texte.length; i += 2) {
+                matriceTexte.push([
+                    texte.charCodeAt(i) - 65,
+                    texte.charCodeAt(i + 1) ? texte.charCodeAt(i + 1) - 65 : 0
+                ]);
+            }
+            return matriceTexte;
+        }
+        
+        function multiplicationMatriceVecteur(matrice, vecteur) {
+            let resultat = [];
+            for (let i = 0; i < matrice.length; i++) {
+                let somme = 0;
+                for (let j = 0; j < vecteur.length; j++) {
+                    somme += matrice[i][j] * vecteur[j];
+                }
+                resultat.push(somme % 26);
+            }
+            return resultat;
+        }
+        
+        function inverseMatrice(matrice, mod) {
+            let det = (matrice[0][0] * matrice[1][1] - matrice[0][1] * matrice[1][0]) % mod;
+            let detInv = modInverse(det, mod);
+            
+            return [
+                [(matrice[1][1] * detInv) % mod, (-matrice[0][1] * detInv) % mod],
+                [(-matrice[1][0] * detInv) % mod, (matrice[0][0] * detInv) % mod]
+            ].map(row => row.map(val => ((val % mod) + mod) % mod));
+        }
+        
+        function modInverse(a, mod) {
+            for (let x = 1; x < mod; x++) {
+                if ((a * x) % mod === 1) {
+                    return x;
+                }
+            }
+            
+        }
+        
+        function gcd(a, b) {
+            if (!b) return a;
+            return gcd(b, a % b);
+        }
+        
+    </script>
+</body>
+</html>

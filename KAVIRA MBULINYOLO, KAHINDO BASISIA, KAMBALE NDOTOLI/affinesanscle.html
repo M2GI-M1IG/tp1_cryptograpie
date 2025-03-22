@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Déchiffrement Affine Sans clé</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container bg-light col-5 shadow border rounded-4  mt-5">
+        <div class="container mt-5">
+            <h1 class="text-center mb-4">Affine sans clé </h1>
+            <div class="form-group">
+                <label for="texte">Texte chiffré :</label>
+                <textarea id="texte" class="form-control" rows="4"></textarea>
+            </div><br>
+            <div class="form-group text-center">
+                <button onclick="bruteforce()" class="btn btn-primary mx-2">Déchiffrer</button>
+            </div>
+            <div class="form-group">
+                <label for="resultats">Résultats :</label>
+                <textarea id="resultats" class="form-control" rows="8" readonly></textarea>
+            </div>
+        </div>
+
+    </div>
+    
+    
+    <script >
+        function bruteforce() {
+            let texte = document.getElementById('texte').value;
+            let resultats = [];
+        
+            for (let a = 1; a < 26; a++) {
+                if (gcd(a, 26) === 1) {
+                    for (let b = 0; b < 26; b++) {
+                        let texteDechiffre = affine(texte, a, b, false);
+                        resultats.push(`Clé a=${a}, b=${b}: ${texteDechiffre}`);
+                    }
+                }
+            }
+        
+            document.getElementById('resultats').value = resultats.join('\n');
+        }
+        
+        function affine(texte, a, b, chiffrer = true) {
+            let resultat = '';
+            texte = texte.toUpperCase();
+            
+            if (chiffrer) {
+                for (let i = 0; i < texte.length; i++) {
+                    let caractere = texte.charAt(i);
+                    if (caractere.match(/[A-Z]/)) {
+                        let code = caractere.charCodeAt(0) - 65;
+                        resultat += String.fromCharCode(((a * code + b) % 26) + 65);
+                    } else {
+                        resultat += caractere;
+                    }
+                }
+            } else {
+                let a_inv = modInverse(a, 26);
+                for (let i = 0; i < texte.length; i++) {
+                    let caractere = texte.charAt(i);
+                    if (caractere.match(/[A-Z]/)) {
+                        let code = caractere.charCodeAt(0) - 65;
+                        resultat += String.fromCharCode((a_inv * (code - b + 26) % 26) + 65);
+                    } else {
+                        resultat += caractere;
+                    }
+                }
+            }
+            
+            return resultat;
+        }
+        
+        function modInverse(a, m) {
+            for (let x = 1; x < m; x++) {
+                if ((a * x) % m === 1) {
+                    return x;
+                }
+            }
+           
+        }
+        
+        function gcd(a, b) {
+            if (b === 0) {
+                return a;
+            }
+            return gcd(b, a % b);
+        }
+        
+    </script>
+</body>
+</html>
